@@ -47,11 +47,11 @@
 
     <script>
         // 获取URL中的参数
-        const urlParams = new URLSearchParams(window.location.search);
-        const conversationId = urlParams.get('id');
+        const conversationId = "{{ conversation_id }}";
+        console.log(conversationId)
 
         // 异步请求JSON数据
-        fetch('../history/' + conversationId + '.json')
+        fetch(`/get_conversation_data/${conversationId}`)
             .then(response => response.json())
             .then(jsonData => {
                 // 获取聊天容器
