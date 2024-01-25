@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Chat History</title>
+    <style>
+        body {
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+        }
+
+        #chat-container {
+            max-width: 800px;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .user-message {
+            background-color: #1f3b58;
+            color: #fff;
+        }
+
+        .assistant-message {
+            background-color: #000000;
+            color: #fff;
+        }
+
+        .timestamp {
+            color: #999;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container"></div>
+
+    <script>
+        // 获取URL中的参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const conversationId = urlParams.get('id');
+
+        // 异步请求JSON数据
+        fetch('../history/' + conversationId + '.json')
+            .then(response => response.json())
+            .then(jsonData => {
+                // 获取聊天容器
+                const chatContainer = document.getElementById('chat-container');
+
+                // 遍历JSON数据并在页面中显示
+                for (const timestamp in jsonData) {
+                    if (jsonData.hasOwnProperty(timestamp)) {
+                        const message = jsonData[timestamp];
+                        const userMessage = `<div class="message user-message">${getTimestamp(timestamp)}${escapeAndReplaceNewline(message.user)}</div>`;
+                        const assistantMessage = `<div class="message assistant-message">${escapeAndReplaceNewline(message.assistant)}</div>`;
+
+                        // 将用户和助手的消息添加到聊天容器
+                        chatContainer.innerHTML += userMessage + assistantMessage;
+                    }
+                }
+            })
+            .catch(error => console.error('Error fetching JSON:', error));
+
+        // 替换换行符为 <br> 标签
+        function escapeAndReplaceNewline(text) {
+            return text.replace(/\n/g, '<br>');
+        }
+
+        // 获取格式化的时间戳
+        function getTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            return `<div class="timestamp">${date.toLocaleString()}</div>`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>点击按钮显示JSON数据</title>
+</head>
+<body>
+    <button onclick="loadJsonData()">点击加载JSON数据</button>
+
+    <div id="output"></div>
+
+    <script>
+        // 定义加载JSON数据的函数
+        function loadJsonData() {
+            // 异步请求JSON数据
+            fetch('../history/src_4KkXvkqdCqxwbM2nGILu1.json')
+                .then(response => response.json())
+                .then(data => {
+                    // 在这里处理JSON数据
+                    console.log(data);
+
+                    // 将数据显示在页面上
+                    document.getElementById('output').innerHTML = JSON.stringify(data, null, 2);
+                })
+                .catch(error => console.error('Error fetching JSON:', error));
+        }
+    </script>
+</body>
+</html>

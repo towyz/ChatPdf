@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Chat History</title>
+    <style>
+        #chat-container {
+            max-width: 600px;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+        }
+
+        .message {
+            margin: 10px 0;
+        }
+
+        .user-message {
+            color: #0066cc;
+        }
+
+        .assistant-message {
+            color: #009900;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container"></div>
+
+    <script>
+        // 异步请求JSON数据
+        fetch('../history/src_4KkXvkqdCqxwbM2nGILu1.json')
+            .then(response => response.json())
+            .then(jsonData => {
+                // 获取聊天容器
+                const chatContainer = document.getElementById('chat-container');
+
+                // 遍历JSON数据并在页面中显示
+                for (const timestamp in jsonData) {
+                    if (jsonData.hasOwnProperty(timestamp)) {
+                        const message = jsonData[timestamp];
+                        const userMessage = `<div class="message user-message">${escapeAndReplaceNewline(message.user)}</div>`;
+                        const assistantMessage = `<div class="message assistant-message">${escapeAndReplaceNewline(message.assistant)}</div>`;
+
+                        // 将用户和助手的消息添加到聊天容器
+                        chatContainer.innerHTML += userMessage + assistantMessage;
+                    }
+                }
+            })
+            .catch(error => console.error('Error fetching JSON:', error));
+
+        // 替换换行符为 <br> 标签
+        function escapeAndReplaceNewline(text) {
+            return text.replace(/\n/g, '<br>');
+        }
+    </script>
+</body>
+</html>
