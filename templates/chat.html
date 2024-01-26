@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatPDF Chat History</title>
+    <style>
+        body {
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        #chat-container {
+            max-width: 800px;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .user-message {
+            background-color: #1f3b58;
+            color: #fff;
+        }
+
+        .assistant-message {
+            background-color: #000000;
+            color: #fff;
+        }
+
+        .timestamp {
+            color: #999;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        /* Container for input and button at the bottom */
+        #input-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 60%;
+            transform: translateX(30%);
+            background-color: #fff;
+            padding: 10px;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            border-radius: 8px;
+        }
+
+        /* Style for the input */
+        #user-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        /* Style for the send button */
+        #send-button {
+            padding: 10px 15px;
+            background-color: #1f3b58;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container"></div>
+    
+    <!-- Container for input and button at the bottom -->
+    <div id="input-container">
+        <input type="text" id="user-input" placeholder="Type your question...">
+        <button id="send-button" onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        // 获取URL中的参数
+        const conversationId = "{{ conversation_id }}";
+        console.log(conversationId)
+
+        // 异步请求JSON数据
+        fetch(`/get_conversation_data/${conversationId}`)
+            .then(response => response.json())
+            .then(jsonData => {
+                // 获取聊天容器
+                const chatContainer = document.getElementById('chat-container');
+
+                // 遍历JSON数据并在页面中显示
+                for (const timestamp in jsonData) {
+                    if (jsonData.hasOwnProperty(timestamp)) {
+                        const message = jsonData[timestamp];
+                        const userMessage = `<div class="message user-message">${getTimestamp(timestamp)}${escapeAndReplaceNewline(message.user)}</div>`;
+                        const assistantMessage = `<div class="message assistant-message">${escapeAndReplaceNewline(message.assistant)}</div>`;
+
+                        // 将用户和助手的消息添加到聊天容器
+                        chatContainer.innerHTML += userMessage + assistantMessage;
+                    }
+                }
+            })
+            .catch(error => console.error('Error fetching JSON:', error));
+
+        // 替换换行符为 <br> 标签
+        function escapeAndReplaceNewline(text) {
+            return text.replace(/\n/g, '<br>');
+        }
+
+        // 获取格式化的时间戳
+        function getTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            return `<div class="timestamp">${date.toLocaleString()}</div>`;
+        }
+
+        function sendMessage() {
+            const userInput = document.getElementById('user-input').value;
+            if (userInput.trim() !== '') {
+                // Clear the input box
+                document.getElementById('user-input').value = '';
+                
+
+                // Send user message to the backend
+                fetch(`/send_message/${conversationId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user: userInput }),
+                })
+                .then(response => response.json())
+                .then(updatedData => {
+                    // Clear existing chat content
+                    document.getElementById('chat-container').innerHTML = '';
+
+                    // Display updated chat content
+                    for (const timestamp in updatedData) {
+                        if (updatedData.hasOwnProperty(timestamp)) {
+                            const message = updatedData[timestamp];
+                            const userMessage = `<div class="message user-message">${getTimestamp(timestamp)}${escapeAndReplaceNewline(message.user)}</div>`;
+                            const assistantMessage = `<div class="message assistant-message">${escapeAndReplaceNewline(message.assistant)}</div>`;
+
+                            // Add messages to the chat container
+                            document.getElementById('chat-container').innerHTML += userMessage + assistantMessage;
+                        }
+                    }
+                })
+                .catch(error => console.error('Error sending message:', error));
+            }
+        }
+    </script>
+</body>
+</html>
