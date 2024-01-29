@@ -40,6 +40,7 @@ def index():
 def send_message(conversation_id):
     data = request.get_json()
     user_message = data.get("user")
+    # print("User:", user_message)
 
     with open(os.path.join(os.path.abspath("."), "settings", "API_KEYS.json")) as f:
         api_key = json.load(f)["ChatPDF_API"]
@@ -59,16 +60,17 @@ def send_message(conversation_id):
         "sourceId": sourceId,
         "messages": [message],
     }
+    # print(data)
 
     response = requests.post(
         "https://api.chatpdf.com/v1/chats/message", headers=headers, json=data
     )
 
+    output_dir = "./history"
     if response.status_code == 200:
         print("Result:", response.json()["content"])
 
         # store the history of chatting
-        output_dir = "./history"
         listdir = os.listdir(output_dir)
         if str(sourceId) + ".json" in listdir:
             with open(os.path.join(output_dir, str(sourceId) + ".json"), "r") as f:
