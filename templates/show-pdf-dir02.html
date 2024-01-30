@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Selection</title>
+    <style>
+        body {
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+        }
+
+        #conversation-list {
+            max-width: 800px;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            padding: 10px;
+            background-color: #fff;
+        }
+
+        .conversation-item {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+
+        .conversation-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .conversation-item img {
+            max-width: 50px;
+            margin-right: 10px;
+        }
+
+        .conversation-id {
+            font-weight: bold;
+        }
+
+        .center-div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="conversation-list"></div>
+    <div class="center-div">
+        <input type="file" name="uploadfile" class="form-control">&nbsp;
+        <button type="button" onclick="loadFile()" class="btn btn-primary">upload here</button>
+    </div>
+
+    <script>
+        // 异步请求JSON数据
+        fetch('/get_conversation_dir')
+            .then(response => response.json())
+            .then(conversationData => {
+                // 获取对话列表容器
+                const conversationList = document.getElementById('conversation-list');
+
+                // 遍历对话数据并创建对话列表项
+                for (const id in conversationData) {
+                    if (conversationData.hasOwnProperty(id)) {
+                        const pdfPath = conversationData[id];
+                        const conversationItem = document.createElement('div');
+                        conversationItem.classList.add('conversation-item');
+                        conversationItem.innerHTML = `
+                            <img src="cover_placeholder.jpg" alt="Cover Image">
+                            <div>
+                                <div class="conversation-id">${id}</div>
+                                <div>${pdfPath}</div>
+                            </div>
+                        `;
+
+                        // 添加点击事件，向后端发起请求，进行页面跳转
+                        conversationItem.addEventListener('click', () => {
+                            window.location.href = '/chat/' + id;
+                        });
+
+                        // 将对话列表项添加到对话列表容器
+                        conversationList.appendChild(conversationItem);
+                    }
+                }
+            })
+            .catch(error => console.error('Error fetching JSON:', error));
+
+        function loadFile() {
+            const fileInput = document.querySelector('input[name="uploadfile"]');
+            const file = fileInput.files[0];
+
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                fetch('/upload_file', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(updatedConversationData => {
+                    const conversationList = document.getElementById('conversation-list');
+
+                    // 清空旧的对话列表
+                    conversationList.innerHTML = '';
+
+                    // 遍历更新后的对话数据并创建新的对话列表项
+                    for (const id in updatedConversationData) {
+                        if (updatedConversationData.hasOwnProperty(id)) {
+                            const pdfPath = updatedConversationData[id];
+                            const conversationItem = document.createElement('div');
+                            conversationItem.classList.add('conversation-item');
+                            conversationItem.innerHTML = `
+                                <img src="cover_placeholder.jpg" alt="Cover Image">
+                                <div>
+                                    <div class="conversation-id">${id}</div>
+                                    <div>${pdfPath}</div>
+                                </div>
+                            `;
+
+                            // 添加点击事件，向后端发起请求，进行页面跳转
+                            conversationItem.addEventListener('click', () => {
+                                window.location.href = '/chat/' + id;
+                            });
+
+                            // 将对话列表项添加到对话列表容器
+                            conversationList.appendChild(conversationItem);
+                        }
+                    }
+                })
+                .catch(error => console.error('Error uploading file:', error));
+            }
+            else {
+                console.error('No file selected.');
+            }
+        }
+
+    </script>
+</body>
+</html>

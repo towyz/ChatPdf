@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatPDF Chat History</title>
+    <title>PDF Chat History</title>
     <style>
         body {
             background-color: #f4f4f4;
@@ -69,6 +69,19 @@
             font-size: 14px;
         }
 
+        #chat-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-size: 18px;
+            width: 100%;
+            height: 60px;
+            resize: none;
+            overflow-y: auto;
+        }
+
         /* Style for the send button */
         #send-button {
             padding: 10px 15px;
@@ -87,7 +100,7 @@
     
     <!-- Container for input and button at the bottom -->
     <div id="input-container">
-        <input type="text" id="user-input" placeholder="Type your question...">
+        <textarea type="text" id="chat-input" placeholder="Type your question..."></textarea>
         <button id="send-button" onclick="sendMessage()">Send</button>
     </div>
 
@@ -129,10 +142,10 @@
         }
 
         function sendMessage() {
-            const userInput = document.getElementById('user-input').value;
+            const userInput = document.getElementById('chat-input').value;
             if (userInput.trim() !== '') {
                 // Clear the input box
-                document.getElementById('user-input').value = '';
+                document.getElementById('chat-input').value = '';
                 
 
                 // Send user message to the backend
